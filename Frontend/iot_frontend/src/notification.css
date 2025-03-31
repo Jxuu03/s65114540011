@@ -1,0 +1,14 @@
+.notification {
+    padding: 20px;
+    border-radius: 5px;
+    margin: 10px;
+    color: #fff;
+  }
+  
+  .notification.yellow {
+    background-color: #ffcc00;
+  }
+  
+  .notification.red {
+    background-color: #ff0000;
+  }

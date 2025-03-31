@@ -1,0 +1,162 @@
+/* Modal overlay to cover the entire screen */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inria Sans';
+  transition: top 2s;
+  animation: slideIn 1s;
+  z-index: 1000;
+}
+
+@keyframes slideIn {
+  0% {
+    top: -100px;
+  }
+  100% {
+    top: 0px;
+  }
+}
+
+/* Modal content container */
+.modal-content {
+  overflow-y: auto;
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  max-height: 80vh;
+  width: 80%;
+  max-width: 300px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Make a space-between topic and button */
+.modal-content .content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Heading inside the modal */
+.modal-content h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: #333;
+  text-align: center;
+}
+
+/* Label and input styles */
+.modal-content div {
+  display: block;
+  color: #555;
+}
+
+/* Buttons styling */
+.modal-content .button {
+  font-family: 'Inria Sans';
+  width: 48%;
+  height: 35px;
+  padding: 10px;
+  font-size: 16px;
+  color: gray;
+  background-color: rgba(138, 235, 229, 0.75); 
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Button hover effects */
+.modal-content button:hover,
+.ant-btn:hover {
+  opacity: 0.9;
+}
+
+/* Custom Switch Styling */
+.custom-switch .ant-switch {
+  width: 70px; 
+  height: 30px; 
+  background-color: #ccc !important; 
+  display: flex;
+  position: relative;
+  align-items: center; 
+  padding: 4px 10px 4px 10px; 
+  margin-top: 15px;
+}
+
+/* Switch checked state background */
+.custom-switch .ant-switch-checked {
+  background-color: rgba(138, 235, 229, 0.75) !important; 
+}
+
+/* Handle styling (knob inside the switch) */
+.custom-switch .ant-switch-handle {
+  top: 20%;
+}
+
+/* Typography */
+.modal-content .ant-form, .ant-radio-wrapper,
+.ant-picker, .ant-modal-content, .ant-btn, .ant-list-item, .ant-switch-inner {
+  font-family: 'Inria Sans';
+  font-size: 16px;
+  position: static;
+}
+
+/* Form transition */
+.modal-form {
+  transition: opacity 0.7s ease-in-out, max-height 0.7s ease-in-out;
+  opacity: 1;
+  max-height: 1000px; 
+  overflow: hidden;
+}
+
+.modal-form.hidden {
+  opacity: 0;
+  max-height: 0;
+}
+
+/* antd form item addition */
+.modal-content .ant-form-item-label {
+  height: 5;
+  top: 53px;
+  right: 75px;
+}
+
+/* Ant Design form item label */
+.ant-form-item .ant-form-item-label >label {
+  color: #555;
+  font-family: 'Inria Sans';
+  font-size: 14px;
+}
+
+/* For mobile responsiveness */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+  }
+}
+
+.preferences-modal div {
+  display: flex; 
+  color: inherit;
+  font-family: 'Inria Sans';
+}
+
+.custom-input-number .ant-input-number-input, .ant-radio-button-wrapper, .ant-pagination-item a, .ant-collapse-header, .ant-collapse {
+  font-family: 'Inria Sans';
+}
+
+.ant-radio-button-wrapper {
+  text-align: center;
+  width: 150px;
+}
+
