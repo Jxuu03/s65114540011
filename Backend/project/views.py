@@ -140,7 +140,7 @@ def lightControl(request):
             action = data.get("action")
             status = data.get("status")
             latestcolor = lightData.objects.latest("timestamp")
-            color = latestcolor.color
+            color = latestcolor.color if latestcolor else 'rgb(245, 255, 197)'
 
             # Save users' light schedule setting
             if action == "Schedule":
