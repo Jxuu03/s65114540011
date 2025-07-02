@@ -4,7 +4,7 @@ import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyCMvYPcTdxt7lc2yqAXGIpeZmAOBeBvyLQ",
+    apiKey: "",
     authDomain: "freshyfishy-kmch.firebaseapp.com",
     projectId: "freshyfishy-kmch",
     storageBucket: "freshyfishy-kmch.appspot.com",
