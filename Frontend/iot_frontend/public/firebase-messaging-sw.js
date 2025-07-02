@@ -4,7 +4,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.13.1/firebase-messaging-com
 
 // Initialize Firebase
 firebase.initializeApp({
-    apiKey: "",
+    apiKey: "AIzaSyCMvYPcTdxt7lc2yqAXGIpeZmAOBeBvyLQ",
     authDomain: "freshyfishy-kmch.firebaseapp.com",
     projectId: "freshyfishy-kmch",
     storageBucket: "freshyfishy-kmch.appspot.com",
