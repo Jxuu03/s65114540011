@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.12
 
 WORKDIR /app
 
@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     default-libmysqlclient-dev \
     pkg-config \
     build-essential \
+    default-mysql-client \
     && apt-get clean
 
 COPY requirements.txt .

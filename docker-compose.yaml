@@ -1,3 +1,4 @@
+version: "3.9"
 
 services:
   backend:
@@ -16,6 +17,15 @@ services:
       - DB_PORT=3306
     depends_on:
       - db
+    restart: always
+    command: >
+      sh -c "
+      until mysqladmin ping -h db -umyuser -pmypassword --silent; do
+        echo 'Waiting for MySQL...'; sleep 2;
+      done;
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000
+      "
 
   frontend:
     build: ./frontend/iot_frontend
@@ -24,6 +34,7 @@ services:
     volumes:
       - ./frontend/iot_frontend:/app
       - /app/node_modules
+    restart: always
 
   db:
     image: mysql:8.0
