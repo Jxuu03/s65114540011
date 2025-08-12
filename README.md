@@ -10,9 +10,6 @@
    ```
 3. Install requirements
    ```
-   cd FreshyFishy
-   ```
-   ```
    cd Backend
    ```
    ```
@@ -47,9 +44,6 @@
    ```
 2. ```
    cd CI-CD-1-2568
-   ```
-   ```
-   cd FreshyFishy
    ```
 3. Build
    ```
