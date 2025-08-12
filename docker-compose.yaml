@@ -48,6 +48,18 @@ services:
       - mysql_data:/var/lib/mysql
     ports:
       - "3307:3306"
+  
+  postdata:
+    image: curlimages/curl:8.8.0
+    depends_on:
+      - backend
+    entrypoint: >
+      sh -c "
+        sleep 5 &&
+        curl -X POST http://host.docker.internal:8000/project/sensorDataDisplay/
+        -H 'Content-Type: application/json'
+        -d '{\"temp\":25, \"ph\":7.5, \"tds\":250, \"waterLv\":95}'
+      "
 
 volumes:
   mysql_data:

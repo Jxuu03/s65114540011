@@ -35,7 +35,9 @@ ALLOWED_HOSTS = ["127.0.0.1",
                  "192.168.55.112", 
                  "192.168.0.112",
                  "322e-49-229-22-72.ngrok-free.app",
-                 "10.255.106.245"]
+                 "10.255.106.245",
+                 "10.0.2.2",
+                 "host.docker.internal"]
 
 
 # Application definition
@@ -145,6 +147,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://10.255.106.245:8000",
     "http://localhost:3000",
     "https://322e-49-229-22-72.ngrok-free.app",
+    "http://10.0.2.2:8000",
 ]
 
 CORS_ALLOW_METHODS = [

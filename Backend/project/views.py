@@ -11,6 +11,7 @@ import time
 from .mqtt_client import *
 from django.db.models.functions import TruncDate, TruncTime
 
+
 def save_schedule(workingTime, desc, freq):
     workingDate = timezone.now().date()
     status = "Pending"  # Added in server
@@ -142,13 +143,10 @@ def lightControl(request):
             latestcolor = lightData.objects.order_by("-timestamp").first()
             if not latestcolor:
                 latestcolor = lightData.objects.create(
-                    timestamp=timezone.now(),
-                    status="OFF",  
-                    color="rgb(245, 255, 197)"
+                    timestamp=timezone.now(), status="OFF", color="rgb(245, 255, 197)"
                 )
 
             color = latestcolor.color
-
 
             # Save users' light schedule setting
             if action == "Schedule":
@@ -180,7 +178,9 @@ def lightControl(request):
                 result = light_instant(status, color)
                 # Log the event
                 timestamp = timezone.now()
-                lightData.objects.create(timestamp=timestamp, status=status, color=color)
+                lightData.objects.create(
+                    timestamp=timestamp, status=status, color=color
+                )
                 return JsonResponse(result, status=200)
 
         except Exception as e:
@@ -193,7 +193,10 @@ def lightControl(request):
                 {"status": latest_data.status, "color": latest_data.color}
             )
         except lightData.DoesNotExist:
-            return JsonResponse({"message": "No data found", "timestamp": None})
+            latest_data = lightData.objects.create(
+                timestamp=timezone.now(), status="OFF", color="rgb(245, 255, 197)"
+            )
+        return JsonResponse({"status": latest_data.status, "color": latest_data.color})
 
     elif request.method == "PUT":
         try:
@@ -284,11 +287,17 @@ def sensorEval(action, data):
             toNotice["Water Level"] = "Red"
 
         # Check for "Orange" alerts only if "Red" is NOT already present
-        if "Temperature" not in toNotice and (data.temp < preferences.minGrnTemp or data.temp > preferences.maxGrnTemp):
+        if "Temperature" not in toNotice and (
+            data.temp < preferences.minGrnTemp or data.temp > preferences.maxGrnTemp
+        ):
             toNotice["Temperature"] = "Orange"
-        if "pH" not in toNotice and (data.ph < preferences.minGrnPh or data.ph > preferences.maxGrnPh):
+        if "pH" not in toNotice and (
+            data.ph < preferences.minGrnPh or data.ph > preferences.maxGrnPh
+        ):
             toNotice["pH"] = "Orange"
-        if "TDS" not in toNotice and (data.tds < preferences.minGrnTds or data.tds > preferences.maxGrnTds):
+        if "TDS" not in toNotice and (
+            data.tds < preferences.minGrnTds or data.tds > preferences.maxGrnTds
+        ):
             toNotice["TDS"] = "Orange"
         if "Water Level" not in toNotice and data.waterLv < preferences.grnWaterLv:
             toNotice["Water Level"] = "Orange"
@@ -338,14 +347,14 @@ def sensorDataDisplay(request):
                     body = "Water quality needs attention!"
                 elif latest_data.eval == "Red":
                     body = "Critical water quality evaluate detected!"
-                    
+
                 sendPushNotification(title, body, latest_data.eval)
 
             result = sensorEval("getToNotice", latest_data)
             print(f'*********** {result["toNotice"]}')
-            
+
             display_quality(latest_data, result)
-            
+
             return JsonResponse(
                 {
                     "temp": round(latest_data.temp, 1),
@@ -520,32 +529,30 @@ def preferences(request):
 
             print(f"Received new preferences setting: {data}")
 
-            preferences = userPreferences.objects.get_or_create(
-                id=1  
-            )
+            preferences, created = userPreferences.objects.get_or_create(id=1)
 
-            # Update 
-            preferences.minGrnTemp = data.get("minGrnTemp", preferences.minGrnTemp)
-            preferences.maxGrnTemp = data.get("maxGrnTemp", preferences.maxGrnTemp)
-            preferences.minOrgTemp = data.get("minOrgTemp", preferences.minOrgTemp)
-            preferences.maxOrgTemp = data.get("maxOrgTemp", preferences.maxOrgTemp)
-            
-            preferences.minGrnPh = data.get("minGrnPh", preferences.minGrnPh)
-            preferences.maxGrnPh = data.get("maxGrnPh", preferences.maxGrnPh)
-            preferences.minOrgPh = data.get("minOrgPh", preferences.minOrgPh)
-            preferences.maxOrgPh = data.get("maxOrgPh", preferences.maxOrgPh)
-            
-            preferences.minGrnTds = data.get("minGrnTds", preferences.minGrnTds)
-            preferences.maxGrnTds = data.get("maxGrnTds", preferences.maxGrnTds)
-            preferences.minOrgTds = data.get("minOrgTds", preferences.minOrgTds)
-            preferences.maxOrgTds = data.get("maxOrgTds", preferences.maxOrgTds)
-            
-            preferences.grnWaterLv = data.get("grnWaterLv", preferences.grnWaterLv)
-            preferences.orgWaterLv = data.get("orgWaterLv", preferences.orgWaterLv)
-            preferences.tankHeight = data.get("tankHeight", preferences.tankHeight)
+            # Update
+            preferences.minGrnTemp = float(data.get("minGrnTemp", preferences.minGrnTemp))
+            preferences.maxGrnTemp = float(data.get("maxGrnTemp", preferences.maxGrnTemp))
+            preferences.minOrgTemp = float(data.get("minOrgTemp", preferences.minOrgTemp))
+            preferences.maxOrgTemp = float(data.get("maxOrgTemp", preferences.maxOrgTemp))
+
+            preferences.minGrnPh = float(data.get("minGrnPh", preferences.minGrnPh))
+            preferences.maxGrnPh = float(data.get("maxGrnPh", preferences.maxGrnPh))
+            preferences.minOrgPh = float(data.get("minOrgPh", preferences.minOrgPh))
+            preferences.maxOrgPh = float(data.get("maxOrgPh", preferences.maxOrgPh))
+
+            preferences.minGrnTds = float(data.get("minGrnTds", preferences.minGrnTds))
+            preferences.maxGrnTds = float(data.get("maxGrnTds", preferences.maxGrnTds))
+            preferences.minOrgTds = float(data.get("minOrgTds", preferences.minOrgTds))
+            preferences.maxOrgTds = float(data.get("maxOrgTds", preferences.maxOrgTds))
+
+            preferences.grnWaterLv = float(data.get("grnWaterLv", preferences.grnWaterLv))
+            preferences.orgWaterLv = float(data.get("orgWaterLv", preferences.orgWaterLv))
+            preferences.tankHeight = float(data.get("tankHeight", preferences.tankHeight))
 
             preferences.save()
-            
+
             # Evaluate Latest Sensor Data again with the newest preferences
             latest_data = sensorData.objects.last()
             new_eval = sensorEval("getEval", latest_data)
@@ -589,55 +596,58 @@ def preferences(request):
         except Exception as e:
             return JsonResponse({"message": f"Error occurred: {str(e)}"}, status=500)
 
+
 def display_quality(latest_data, toNotice):
     mqtt_client_instance.connect()
-    payload = json.dumps({
-        "eval": latest_data.eval,
-        "notice": toNotice["toNotice"],
-    })
+    payload = json.dumps(
+        {
+            "eval": latest_data.eval,
+            "notice": toNotice["toNotice"],
+        }
+    )
     print(f"----------------", payload)
     mqtt_client_instance.publish("Freshyfishy/quality", payload)
 
+
 @csrf_exempt
 def report(request):
-    if request.method == 'GET':
+    if request.method == "GET":
         try:
             sensor_query = (
                 sensorData.objects.annotate(
-                    date=TruncDate('timestamp'),
-                    time=TruncTime('timestamp'))
-                .values('date', 'time', 'temp', 'ph', 'tds', 'waterLv', 'eval')
-                .order_by('timestamp')  
+                    date=TruncDate("timestamp"), time=TruncTime("timestamp")
+                )
+                .values("date", "time", "temp", "ph", "tds", "waterLv", "eval")
+                .order_by("timestamp")
             )
-            
+
             feeding_query = (
                 feedingData.objects.annotate(
-                    date=TruncDate('timestamp'),
-                    time=TruncTime('timestamp'))
-                .values('date', 'time', 'data')
-                .order_by('timestamp')  
+                    date=TruncDate("timestamp"), time=TruncTime("timestamp")
+                )
+                .values("date", "time", "data")
+                .order_by("timestamp")
             )
-            
+
             light_query = (
                 lightData.objects.annotate(
-                    date=TruncDate('timestamp'),
-                    time=TruncTime('timestamp'))
-                .values('date', 'time', 'status')
-                .order_by('timestamp')  
+                    date=TruncDate("timestamp"), time=TruncTime("timestamp")
+                )
+                .values("date", "time", "status")
+                .order_by("timestamp")
             )
-            
+
             sensor_data = list(sensor_query)
             feeding_data = list(feeding_query)
             light_data = list(light_query)
 
             for data in sensor_data + feeding_data + light_data:
-                data['time'] = data['time'].strftime('%H:%M')
+                data["time"] = data["time"].strftime("%H:%M")
 
-            return JsonResponse({
-                "sensor": sensor_data,
-                "feeding": feeding_data,
-                "light": light_data
-            }, safe=False)
-            
+            return JsonResponse(
+                {"sensor": sensor_data, "feeding": feeding_data, "light": light_data},
+                safe=False,
+            )
+
         except Exception as e:
             return JsonResponse({"message": f"Error occurred: {str(e)}"}, status=500)
