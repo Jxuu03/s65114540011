@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   backend:
@@ -14,52 +13,45 @@ services:
       - DB_USER=myuser
       - DB_PASSWORD=mypassword
       - DB_HOST=db
-      - DB_PORT=3306
+      - DB_PORT=5432
     depends_on:
       - db
     restart: always
     command: >
       sh -c "
-      until mysqladmin ping -h db -umyuser -pmypassword --silent; do
-        echo 'Waiting for MySQL...'; sleep 2;
+      until pg_isready -h db -p 5432 -U myuser; do
+        echo 'Waiting for PostgreSQL...'; sleep 2;
       done;
       python manage.py migrate &&
-      python manage.py runserver 0.0.0.0:8000
+      gunicorn freshyfishy.wsgi:application --bind 0.0.0.0:8000 --workers 3
       "
+
 
   frontend:
     build: ./frontend/iot_frontend
     ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend/iot_frontend:/app
-      - /app/node_modules
+      - "80:80"
     restart: always
 
   db:
-    image: mysql:8.0
+    image: postgres:15
     restart: always
     environment:
-      MYSQL_DATABASE: mydb
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
-      MYSQL_ROOT_PASSWORD: rootpassword
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "3307:3306"
-  
+      - "5433:5432"
+
   postdata:
     image: curlimages/curl:8.8.0
     depends_on:
       - backend
     entrypoint: >
-      sh -c "
-        sleep 5 &&
-        curl -X POST http://host.docker.internal:8000/project/sensorDataDisplay/
-        -H 'Content-Type: application/json'
-        -d '{\"temp\":25, \"ph\":7.5, \"tds\":250, \"waterLv\":95}'
-      "
+      sh -c "curl -X POST http://backend:8000/project/sensorDataDisplay/ -H 'Content-Type: application/json' -d '{\"temp\":25, \"ph\":7.5, \"tds\":250, \"waterLv\":95}'"
+
 
 volumes:
-  mysql_data:
+  postgres_data:

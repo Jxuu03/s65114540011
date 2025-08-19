@@ -11,6 +11,7 @@
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.7",
     "chartjs-adapter-date-fns": "^3.0.0",
+    "date-fns": "^4.1.0",
     "firebase": "^10.13.1",
     "firebase-admin": "^12.4.0",
     "moment-timezone": "^0.5.46",
@@ -48,5 +49,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
 }

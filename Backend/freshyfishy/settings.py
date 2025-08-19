@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-3*d4d93_+ajkkq%8hz!wyfbqz!3_iq6czw)6piy)aabch+a@kl"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["127.0.0.1", 
                  "192.168.1.11",
@@ -37,8 +37,9 @@ ALLOWED_HOSTS = ["127.0.0.1",
                  "322e-49-229-22-72.ngrok-free.app",
                  "10.255.106.245",
                  "10.0.2.2",
-                 "host.docker.internal"]
-
+                 "host.docker.internal",
+                 "202.28.49.122",
+                 "localhost"]
 
 # Application definition
 
@@ -94,12 +95,12 @@ load_dotenv()
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'mydb'),
-        'USER': os.getenv('DB_USER', 'myuser'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'mypassword'),
-        'HOST': os.getenv('DB_HOST', 'db'),
-        'PORT': os.getenv('DB_PORT', '3306'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'mydb'),
+        'USER': os.environ.get('DB_USER', 'myuser'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'mypassword'),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': os.environ.get('DB_PORT', 5432),
     }
 }
 
@@ -148,6 +149,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://322e-49-229-22-72.ngrok-free.app",
     "http://10.0.2.2:8000",
+    "http://202.28.49.122:3000",
+    "http://202.28.49.122:8000",
+    "http://202.28.49.122",
 ]
 
 CORS_ALLOW_METHODS = [
@@ -161,3 +165,6 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_ALL_ORIGINS = True
 TIME_ZONE = 'Asia/Bangkok'
 USE_TZ = False
+
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
