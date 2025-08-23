@@ -3,7 +3,7 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8000:8000"
+      - "20011:8000"
     volumes:
       - ./backend:/app
     environment:
@@ -30,7 +30,7 @@ services:
   frontend:
     build: ./frontend/iot_frontend
     ports:
-      - "80:80"
+      - "10011:80"
     restart: always
 
   db:
@@ -43,7 +43,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "30011:5432"
 
   postdata:
     image: curlimages/curl:8.8.0

@@ -2,8 +2,7 @@ import axios from 'axios';
 import { getToken } from 'firebase/messaging';
 import { messaging } from '../firebase';
 
-const BASE_URL = 'http://127.0.0.1:8000/project/';
-//const BASE_URL = 'https://322e-49-229-22-72.ngrok-free.app/project/';
+const BASE_URL = `${window.location.protocol}//${window.location.hostname}:20011/project/`;
 
 // Permission for push-noti
 export const requestPermission = async () => {
