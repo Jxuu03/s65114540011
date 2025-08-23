@@ -2,7 +2,7 @@
 **การติดตั้งแบบทั่วไป**
 1. Clone Repo
    ```
-   git clone https://github.com/Jxuu03/CI-CD-1-2568.git
+   git clone https://github.com/Jxuu03/s65114540011.git
    ```
 2. Create and switch venv
    ```
@@ -40,13 +40,10 @@
 **การติดตั้งบน Docker**
 1. ในหน้าต่าง Docker ไปที่ Terminal จากนั้น Clone Repo
    ```
-   git clone https://github.com/Jxuu03/CI-CD-1-2568.git
+   git clone https://github.com/Jxuu03/s65114540011.git
    ```
-2. ```
-   cd CI-CD-1-2568
-   ```
-3. Build
+2. Build
    ```
    docker compose up -d --build
    ```
-4. ถ้าสำเร็จ จะเห็นหน้าเว็บที่ http://localhost:3000/
+3. ถ้าสำเร็จ จะเห็นหน้าเว็บที่ http://localhost:10011/
