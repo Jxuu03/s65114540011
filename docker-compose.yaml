@@ -1,9 +1,8 @@
-
 services:
   backend:
     build: ./backend
     ports:
-      - "20011:8000"
+      - "10011:8000"
     volumes:
       - ./backend:/app
     environment:
@@ -25,13 +24,31 @@ services:
       python manage.py migrate &&
       gunicorn freshyfishy.wsgi:application --bind 0.0.0.0:8000 --workers 3
       "
-
+    networks:
+      - default
+      - traefik-public   
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/s0011`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.docker.network=traefik-public"
 
   frontend:
     build: ./frontend/iot_frontend
     ports:
       - "10011:80"
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/s65114540011`)"
+      - "traefik.http.routers.frontend.middlewares=strip-prefix"
+      - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/s65114540011"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000" 
+      - "traefik.docker.network=traefik-public"
+    networks:
+      - traefik-public
 
   db:
     image: postgres:15
@@ -43,15 +60,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "30011:5432"
-
-  postdata:
-    image: curlimages/curl:8.8.0
-    depends_on:
-      - backend
-    entrypoint: >
-      sh -c "curl -X POST http://backend:8000/project/sensorDataDisplay/ -H 'Content-Type: application/json' -d '{\"temp\":25, \"ph\":7.5, \"tds\":250, \"waterLv\":95}'"
-
+      - "20011:5432"
+    networks:
+      - default
 
 volumes:
   postgres_data:
+
+networks:
+  default:
+    driver: bridge
+  traefik-public:
+    external: true
