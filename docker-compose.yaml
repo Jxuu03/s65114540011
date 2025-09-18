@@ -1,8 +1,6 @@
 services:
   backend:
     build: ./backend
-    ports:
-      - "10011:8000"
     volumes:
       - ./backend:/app
     environment:
@@ -29,23 +27,25 @@ services:
       - traefik-public   
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/s0011`)"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/s65114540011/api`)"
       - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.priority=10"
+      - "traefik.http.routers.backend.middlewares=backend-strip"
+      - "traefik.http.middlewares.backend-strip.stripprefix.prefixes=/s65114540011/api"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
       - "traefik.docker.network=traefik-public"
 
   frontend:
     build: ./frontend/iot_frontend
-    ports:
-      - "10011:80"
     restart: always
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/s65114540011`)"
-      - "traefik.http.routers.frontend.middlewares=strip-prefix"
-      - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/s65114540011"
+      - "traefik.http.routers.frontend.priority=1"
+      - "traefik.http.routers.frontend.middlewares=frontend-strip"
+      - "traefik.http.middlewares.frontend-strip.stripprefix.prefixes=/s65114540011"
       - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.services.frontend.loadbalancer.server.port=3000" 
+      - "traefik.http.services.frontend.loadbalancer.server.port=80" 
       - "traefik.docker.network=traefik-public"
     networks:
       - traefik-public
@@ -59,8 +59,6 @@ services:
       POSTGRES_PASSWORD: mypassword
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "20011:5432"
     networks:
       - default
 

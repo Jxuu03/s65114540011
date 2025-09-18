@@ -39,7 +39,9 @@ ALLOWED_HOSTS = ["127.0.0.1",
                  "10.0.2.2",
                  "host.docker.internal",
                  "202.28.49.122",
-                 "localhost"]
+                 "10.80.21.9",
+                 "192.168.10.239",
+                 "192.168.208.1"]
 
 # Application definition
 
@@ -153,6 +155,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://202.28.49.122:8000",
     "http://202.28.49.122:10011",
     "http://202.28.49.122:20011",
+    "http://192.168.10.239",
+    "http://192.168.208.1",
+    "http://10.80.21.9",
 ]
 
 CORS_ALLOW_METHODS = [
