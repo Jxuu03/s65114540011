@@ -236,6 +236,18 @@ def sensorEval(action, data):
         waterLv = data.waterLv
 
     preferences = userPreferences.objects.last()
+    if not preferences:
+        preferences = userPreferences.objects.create(
+            minGrnTemp=25.0, maxGrnTemp=27.0,
+            minOrgTemp=24.0, maxOrgTemp=28.0,
+            minGrnPh=7.0, maxGrnPh=7.8,
+            minOrgPh=6.5, maxOrgPh=8.0,
+            minGrnTds=150, maxGrnTds=450,
+            minOrgTds=100, maxOrgTds=500,
+            grnWaterLv=80, orgWaterLv=50,
+            tankHeight=100
+        )
+
 
     if action == "getEval":
         eval = "Green"
@@ -523,75 +535,89 @@ def scheduleData(request):
 
 @csrf_exempt
 def preferences(request):
+    # ค่าพื้นฐาน default ถ้ายังไม่มีใน DB
+    DEFAULT_PREFS = {
+        "minGrnTemp": 25.0,
+        "maxGrnTemp": 27.0,
+        "minOrgTemp": 24.0,
+        "maxOrgTemp": 28.0,
+        "minGrnPh": 7.0,
+        "maxGrnPh": 7.8,
+        "minOrgPh": 6.5,
+        "maxOrgPh": 8.0,
+        "minGrnTds": 150,
+        "maxGrnTds": 450,
+        "minOrgTds": 100,
+        "maxOrgTds": 500,
+        "grnWaterLv": 80,
+        "orgWaterLv": 50,
+        "tankHeight": 100,
+    }
+
     if request.method == "PUT":
         try:
             data = json.loads(request.body)
-
             print(f"Received new preferences setting: {data}")
 
-            preferences, created = userPreferences.objects.get_or_create(id=1)
+            # get or create default preferences
+            preferences, created = userPreferences.objects.get_or_create(
+                id=1, defaults=DEFAULT_PREFS
+            )
 
-            # Update
-            preferences.minGrnTemp = float(data.get("minGrnTemp", preferences.minGrnTemp))
-            preferences.maxGrnTemp = float(data.get("maxGrnTemp", preferences.maxGrnTemp))
-            preferences.minOrgTemp = float(data.get("minOrgTemp", preferences.minOrgTemp))
-            preferences.maxOrgTemp = float(data.get("maxOrgTemp", preferences.maxOrgTemp))
-
-            preferences.minGrnPh = float(data.get("minGrnPh", preferences.minGrnPh))
-            preferences.maxGrnPh = float(data.get("maxGrnPh", preferences.maxGrnPh))
-            preferences.minOrgPh = float(data.get("minOrgPh", preferences.minOrgPh))
-            preferences.maxOrgPh = float(data.get("maxOrgPh", preferences.maxOrgPh))
-
-            preferences.minGrnTds = float(data.get("minGrnTds", preferences.minGrnTds))
-            preferences.maxGrnTds = float(data.get("maxGrnTds", preferences.maxGrnTds))
-            preferences.minOrgTds = float(data.get("minOrgTds", preferences.minOrgTds))
-            preferences.maxOrgTds = float(data.get("maxOrgTds", preferences.maxOrgTds))
-
-            preferences.grnWaterLv = float(data.get("grnWaterLv", preferences.grnWaterLv))
-            preferences.orgWaterLv = float(data.get("orgWaterLv", preferences.orgWaterLv))
-            preferences.tankHeight = float(data.get("tankHeight", preferences.tankHeight))
+            # Update จาก request หรือใช้ค่าปัจจุบัน
+            for key, default_value in DEFAULT_PREFS.items():
+                setattr(
+                    preferences,
+                    key,
+                    float(data.get(key, getattr(preferences, key, default_value))),
+                )
 
             preferences.save()
 
-            # Evaluate Latest Sensor Data again with the newest preferences
+            # Evaluate Latest Sensor Data อีกครั้ง (ถ้ามี)
             latest_data = sensorData.objects.last()
-            new_eval = sensorEval("getEval", latest_data)
-            latest_data.eval = new_eval["eval"]
-            latest_data.save()
+            if latest_data:
+                new_eval = sensorEval("getEval", latest_data)
+                latest_data.eval = new_eval["eval"]
+                latest_data.save()
 
-            print(f"*-*-*-*-*--*-*-*-*-", data.get("tankheight"))
-            mqtt_client_instance.publish("device/tank", data.get("tankHeight"))
+            mqtt_client_instance.publish(
+                "device/tank", data.get("tankHeight", preferences.tankHeight)
+            )
 
-            return JsonResponse({"message": "Successfully created preferences!"})
+            return JsonResponse(
+                {"message": "Successfully created/updated preferences!"}
+            )
 
         except Exception as e:
             return JsonResponse({"message": f"Error occurred: {str(e)}"}, status=500)
 
     elif request.method == "GET":
         try:
-            latest_data = userPreferences.objects.last()
-            if latest_data:
-                return JsonResponse(
-                    {
-                        "minGrnTemp": latest_data.minGrnTemp,
-                        "maxGrnTemp": latest_data.maxGrnTemp,
-                        "minOrgTemp": latest_data.minOrgTemp,
-                        "maxOrgTemp": latest_data.maxOrgTemp,
-                        "minGrnPh": latest_data.minGrnPh,
-                        "maxGrnPh": latest_data.maxGrnPh,
-                        "minOrgPh": latest_data.minOrgPh,
-                        "maxOrgPh": latest_data.maxOrgPh,
-                        "minGrnTds": latest_data.minGrnTds,
-                        "maxGrnTds": latest_data.maxGrnTds,
-                        "minOrgTds": latest_data.minOrgTds,
-                        "maxOrgTds": latest_data.maxOrgTds,
-                        "grnWaterLv": latest_data.grnWaterLv,
-                        "orgWaterLv": latest_data.orgWaterLv,
-                        "tankHeight": latest_data.tankHeight,
-                    }
-                )
-            else:
-                return JsonResponse({"message": "No data found", "timestamp": None})
+            preferences = userPreferences.objects.last()
+            if not preferences:
+                # สร้าง default ถ้าไม่มี
+                preferences = userPreferences.objects.create(**DEFAULT_PREFS)
+
+            return JsonResponse(
+                {
+                    "minGrnTemp": preferences.minGrnTemp,
+                    "maxGrnTemp": preferences.maxGrnTemp,
+                    "minOrgTemp": preferences.minOrgTemp,
+                    "maxOrgTemp": preferences.maxOrgTemp,
+                    "minGrnPh": preferences.minGrnPh,
+                    "maxGrnPh": preferences.maxGrnPh,
+                    "minOrgPh": preferences.minOrgPh,
+                    "maxOrgPh": preferences.maxOrgPh,
+                    "minGrnTds": preferences.minGrnTds,
+                    "maxGrnTds": preferences.maxGrnTds,
+                    "minOrgTds": preferences.minOrgTds,
+                    "maxOrgTds": preferences.maxOrgTds,
+                    "grnWaterLv": preferences.grnWaterLv,
+                    "orgWaterLv": preferences.orgWaterLv,
+                    "tankHeight": preferences.tankHeight,
+                }
+            )
 
         except Exception as e:
             return JsonResponse({"message": f"Error occurred: {str(e)}"}, status=500)

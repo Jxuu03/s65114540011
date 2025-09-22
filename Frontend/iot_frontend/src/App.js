@@ -23,6 +23,14 @@ function App() {
 
     useEffect(() => {
         // Handling incoming messages with onMessage
+        if (messaging) {
+            messaging.onMessageHandler = (payload) => {
+                console.log("Message received:", payload);
+            };
+        } else {
+            console.warn("Firebase messaging not supported in this environment.");
+        }
+
         onMessage(messaging, (payload) => {
             console.log('Message received (data payload): ', payload.data);
 
