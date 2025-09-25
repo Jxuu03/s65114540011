@@ -169,7 +169,7 @@ const Dashboard = () => {
   // MQTT for checking if there's new action schedule ==> fecth and update status when there's any
   useEffect(() => {
     // Connect to HiveMQ's WebSocket MQTT broker
-    const client = mqtt.connect("wss://test.mosquitto.org:8081/mqtt");
+    const client = mqtt.connect("ws://test.mosquitto.org:8080/mqtt");
 
     client.on("connect", () => {
       console.log("Connected to HiveMQ MQTT broker");

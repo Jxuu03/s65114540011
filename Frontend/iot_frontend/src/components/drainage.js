@@ -14,7 +14,7 @@ const DrainageModal = ({ isOpen, onClose }) => {
 
   // Initialize MQTT client
   useEffect(() => {
-    const client = mqtt.connect("wss://test.mosquitto.org:8081/mqtt");
+    const client = mqtt.connect("ws://test.mosquitto.org:8080/mqtt");
     setMqttClient(client);
 
     client.on('connect', () => {

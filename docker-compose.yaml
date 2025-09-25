@@ -1,23 +1,24 @@
 services:
-  backend:
-    build: ./backend
+  s65114540011-backend:
+    build: ./Backend
+    env_file:
+      - .env
     volumes:
-      - ./backend:/app
+      - ./Backend:/app
     environment:
       - PYTHONDONTWRITEBYTECODE=1
       - PYTHONUNBUFFERED=1
-      - DB_NAME=mydb
-      - DB_USER=myuser
-      - DB_PASSWORD=mypassword
-      - DB_HOST=db
-      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
     depends_on:
-      - db
+      - s65114540011-db
     restart: always
     command: >
       sh -c "
-      until pg_isready -h db -p 5432 -U myuser; do
-        echo 'Waiting for PostgreSQL...'; sleep 2;
+      until pg_isready -h s65114540011-db -p ${DB_PORT} -U ${DB_USER}; 
+        do echo 'Waiting for PostgreSQL...'; sleep 2;
       done;
       python manage.py migrate &&
       gunicorn freshyfishy.wsgi:application --bind 0.0.0.0:8000 --workers 3
@@ -26,28 +27,28 @@ services:
       - traefik-public   
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/s65114540011/api`)"
-      - "traefik.http.routers.backend.entrypoints=web"
-      - "traefik.http.routers.backend.middlewares=backend-strip"
-      - "traefik.http.middlewares.backend-strip.stripprefix.prefixes=/s65114540011/api"
-      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.routers.${BACKEND_PREFIX}.rule=PathPrefix(`/${PREFIX}/api`)"
+      - "traefik.http.routers.${BACKEND_PREFIX}.entrypoints=web"
+      - "traefik.http.routers.${BACKEND_PREFIX}.middlewares=${BACKEND_PREFIX}-strip"
+      - "traefik.http.middlewares.${BACKEND_PREFIX}-strip.stripprefix.prefixes=/${PREFIX}/api"
+      - "traefik.http.services.${BACKEND_PREFIX}.loadbalancer.server.port=8000"
       - "traefik.docker.network=traefik-public"
 
-  frontend:
+  s65114540011-frontend:
     build: ./frontend/iot_frontend
     restart: always
     labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.frontend.rule=PathPrefix(`/s65114540011`)"
-    - "traefik.http.routers.frontend.entrypoints=web"
-    - "traefik.http.routers.frontend.middlewares=frontend-strip"
-    - "traefik.http.middlewares.frontend-strip.stripprefix.prefixes=/s65114540011"
-    - "traefik.http.services.frontend.loadbalancer.server.port=80"
+    - "traefik.http.routers.${FRONTEND_PREFIX}.rule=PathPrefix(`/${PREFIX}`)"
+    - "traefik.http.routers.${FRONTEND_PREFIX}.entrypoints=web"
+    - "traefik.http.routers.${FRONTEND_PREFIX}.middlewares=${FRONTEND_PREFIX}-strip"
+    - "traefik.http.middlewares.${FRONTEND_PREFIX}-strip.stripprefix.prefixes=/${PREFIX}"
+    - "traefik.http.services.${FRONTEND_PREFIX}.loadbalancer.server.port=80"
 
     networks:
       - traefik-public
 
-  db:
+  s65114540011-db:
     image: postgres:15
     restart: always
     environment:

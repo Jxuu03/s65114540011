@@ -18,57 +18,64 @@ function App() {
 
     useEffect(() => {
         // Requesting permission to display notifications
-        API.requestPermission();
+        if (API && API.requestPermission) {
+            API.requestPermission().catch((err) => {
+                console.warn("Could not request notification permission:", err);
+            });
+        }
     }, []);
 
     useEffect(() => {
-        // Handling incoming messages with onMessage
-        if (messaging) {
+        if (!messaging) {
+            console.warn("Firebase messaging not supported in this environment.");
+            return;
+        }
+
+        try {
+            // Set custom handler if messaging object exists
             messaging.onMessageHandler = (payload) => {
                 console.log("Message received:", payload);
             };
-        } else {
-            console.warn("Firebase messaging not supported in this environment.");
+
+            onMessage(messaging, (payload) => {
+                if (!payload || !payload.data) return;
+
+                const { title, body, color } = payload.data;
+
+                // Display the toast notification
+                switch (color) {
+                    case 'Orange':
+                        toast.warning(`${title}: ${body}`, {
+                            position: toast.POSITION.TOP_RIGHT,
+                            theme: "colored"
+                        });
+                        break;
+                    case 'Red':
+                        toast.error(`${title}: ${body}`, {
+                            position: toast.POSITION.TOP_RIGHT,
+                            theme: "colored"
+                        });
+                        break;
+                    default:
+                        toast.info(`${title}: ${body}`, {
+                            position: toast.POSITION.TOP_RIGHT,
+                            theme: "colored"
+                        });
+                        break;
+                }
+
+                // Show modal for critical alerts
+                if (color === 'Orange' || color === 'Red') {
+                    Modal.warning({
+                        centered: true,
+                        title: 'Abnormal Water Quality Detected!',
+                        content: `It seems there was some inappropriate water parameter in your tank. Tap each parameter box to see the guideline!`,
+                    });
+                }
+            });
+        } catch (err) {
+            console.warn("Error initializing Firebase messaging:", err);
         }
-
-        onMessage(messaging, (payload) => {
-            console.log('Message received (data payload): ', payload.data);
-
-            const { title, body, color } = payload.data;
-
-            // Display the toast notification
-            switch (color) {
-                case 'Orange':
-                    toast.warning(`${title}: ${body}`, {
-                        position: toast.POSITION.TOP_RIGHT,
-                        theme: "colored"
-                    });
-                    break;
-                case 'Red':
-                    toast.error(`${title}: ${body}`, {
-                        position: toast.POSITION.TOP_RIGHT,
-                        theme: "colored"
-                    });
-                    break;
-                default:
-                    toast.info(`${title}: ${body}`, {
-                        position: toast.POSITION.TOP_RIGHT,
-                        theme: "colored"
-                    });
-                    break;
-            }
-
-
-            if (color === 'Orange' || color === 'Red') {
-                Modal.warning({
-                    centered: true,
-                    title: 'Abnormal Water Quality Detected!',
-                    content: `It seems there was some inappropriate water parameter in your tank. Tap each parameter box to see the guideline!`,
-                });
-            }
-
-
-        });
     }, []);
 
     return (
